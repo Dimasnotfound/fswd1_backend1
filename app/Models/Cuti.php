@@ -15,7 +15,6 @@ class Cuti extends Model
         'keterangan',
     ];
 
-    // Define the relationship with the Karyawan model
     public function karyawan()
     {
         return $this->belongsTo(Karyawan::class, 'nomor_induk', 'nomor_induk');

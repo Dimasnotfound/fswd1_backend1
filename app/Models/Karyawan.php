@@ -17,7 +17,6 @@ class Karyawan extends Model
         'tanggal_bergabung',
     ];
 
-    // Define the relationship with the Cuti model
     public function cutis()
     {
         return $this->hasMany(Cuti::class, 'nomor_induk', 'nomor_induk');
