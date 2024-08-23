@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Resources\PostResource;
 use App\Models\Karyawan;
+use App\Models\Cuti;
 use Illuminate\Support\Facades\Validator;
 
 class KaryawanController extends Controller
@@ -136,5 +137,45 @@ class KaryawanController extends Controller
                 'message' => 'First three employees retrieved successfully',
                 'code' => 200,
             ]);
+    }
+    // Bagian untuk cuti
+    public function indexCuti()
+    {
+        $cutis = Cuti::with('karyawan')->get();
+        return PostResource::collection($cutis)
+            ->additional([
+                'success' => true,
+                'message' => 'All leave records retrieved successfully',
+                'code' => 200,
+            ]);
+    }
+
+    public function karyawanYangPernahCuti()
+    {
+        $karyawanIds = Cuti::distinct()->pluck('nomor_induk');
+        $karyawans = Karyawan::whereIn('nomor_induk', $karyawanIds)->get();
+        return PostResource::collection($karyawans)
+            ->additional([
+                'success' => true,
+                'message' => 'Employees who have taken leave retrieved successfully',
+                'code' => 200,
+            ]);
+    }
+
+    public function sisaCuti()
+    {
+        $karyawans = Karyawan::all();
+        $sisaCuti = $karyawans->map(function ($karyawan) {
+            $totalCuti = Cuti::where('nomor_induk', $karyawan->nomor_induk)->sum('lama_cuti');
+            $sisaCuti = 12 - $totalCuti;
+            return [
+                'nomor_induk' => $karyawan->nomor_induk,
+                'nama' => $karyawan->nama,
+                'sisa_cuti' => $sisaCuti,
+            ];
+        });
+        return response()->json($sisaCuti, 200)
+            ->header('Content-Type', 'application/json')
+            ->setStatusCode(200);
     }
 }
